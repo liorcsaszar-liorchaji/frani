@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Do you want to sleep with me?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky-top: #6FB8F5;
+    --sky-bottom: #CDEBFF;
+    --check: rgba(255,255,255,0.10);
+    --ink: #0E2A66;
+    --title: #1F4FB0;
+    --btn: #2C6BE0;
+    --btn-dark: #173F95;
+    --btn-light: #FFFFFF;
+    --hill-1: #4A8FE0;
+    --hill-2: #2C62C2;
+    --cloud: #FFFFFF;
+    --frame: #FFFFFF;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --sky-top: #3E86D6;
+      --sky-bottom: #A9D6FA;
+    }
+  }
+  :root[data-theme="dark"] { --sky-top: #3E86D6; --sky-bottom: #A9D6FA; }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    min-height: 100%;
+    font-family: "Press Start 2P", "Courier New", monospace;
+    color: var(--ink);
+    background-color: var(--sky-bottom);
+    background-image:
+      linear-gradient(45deg, var(--check) 25%, transparent 25%, transparent 75%, var(--check) 75%),
+      linear-gradient(45deg, var(--check) 25%, transparent 25%, transparent 75%, var(--check) 75%),
+      linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+    background-position: 0 0, 16px 16px, 0 0;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .scene {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .scene svg { position: absolute; left: 0; bottom: 0; width: 100%; height: 45%; }
+  .clouds { position: absolute; left: 0; top: 8%; width: 100%; height: 30%; }
+
+  main {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 16px 120px;
+    text-align: center;
+  }
+  .frame {
+    width: min(220px, 55vw);
+    aspect-ratio: 1;
+    background: var(--ink);
+    border: 8px solid var(--frame);
+    box-shadow: 0 0 0 6px var(--btn), 0 10px 0 6px var(--btn-dark);
+    display: grid; place-items: center;
+    margin-bottom: 44px;
+  }
+  .frame svg { width: 70%; height: auto; image-rendering: pixelated; }
+  .cat-bob { animation: bob 1.2s steps(2) infinite; }
+  @keyframes bob { 50% { transform: translateY(-4px); } }
+
+  h1 {
+    font-size: clamp(18px, 4.5vw, 38px);
+    line-height: 1.5;
+    color: var(--title);
+    text-shadow: 3px 3px 0 #FFFFFF, 6px 6px 0 rgba(14,42,102,0.25);
+    margin: 0 0 36px;
+    max-width: 18ch;
+  }
+  .buttons {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 20px;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: 4px solid var(--ink);
+    transition: font-size .25s steps(4), padding .25s steps(4);
+  }
+  button:focus-visible { outline: 4px dashed #FFFFFF; outline-offset: 4px; }
+  #yes {
+    font-size: 22px;
+    padding: 16px 30px;
+    background: var(--btn);
+    color: #FFFFFF;
+    box-shadow: inset -4px -4px 0 var(--btn-dark), 0 6px 0 var(--ink);
+  }
+  #yes:active { transform: translateY(4px); box-shadow: inset -4px -4px 0 var(--btn-dark), 0 2px 0 var(--ink); }
+  #no {
+    font-size: 14px;
+    padding: 12px 22px;
+    background: var(--btn-light);
+    color: var(--btn);
+    box-shadow: 0 4px 0 var(--ink);
+  }
+  .hint {
+    min-height: 1.6em;
+    margin-top: 26px;
+    font-size: 12px;
+    color: #FFFFFF;
+    text-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .done h1 { max-width: none; }
+  .hearts span {
+    position: fixed; z-index: 2;
+    font-size: 22px;
+    animation: rise 2.4s steps(12) forwards;
+    pointer-events: none;
+  }
+  @keyframes rise { to { transform: translateY(-80vh); opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cat-bob, .hearts span { animation: none; }
+    button { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="scene" aria-hidden="true">
+    <svg class="clouds" id="clouds" viewBox="0 0 160 40" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges"></svg>
+    <svg id="hills" viewBox="0 0 160 60" preserveAspectRatio="none" shape-rendering="crispEdges"></svg>
+  </div>
+
+  <main id="app">
+    <div class="frame">
+      <svg id="cat" viewBox="0 0 16 16" shape-rendering="crispEdges" class="cat-bob" role="img" aria-label="Gatito"></svg>
+    </div>
+    <h1 id="question">Do you want to sleep with me?</h1>
+    <div class="buttons" id="buttons">
+      <button id="yes">YES ✦</button>
+      <button id="no">No</button>
+    </div>
+    <p class="hint" id="hint"></p>
+  </main>
+  <div class="hearts" id="hearts"></div>
+
+<script>
+  // ---------- Gatito pixel (original) ----------
+  const SAD = [
+    "..kk........kk..",
+    ".kwwk......kwwk.",
+    ".kwwwkkkkkkwwwk.",
+    "kwwwwwwwwwwwwwwk",
+    "kwwwwwwwwwwwwwwk",
+    "kwwkkwwwwwwkkwwk",
+    "kwwkkwwwwwwkkwwk",
+    "kwppwwwwwwwwppwk",
+    "kwwwwwkwkwkwwwwk",
+    "kwwwwwwkwkwwwwwk",
+    ".kwwwwwwwwwwwwk.",
+    ".kwwwwwwwwwwwwk.",
+    "kwwkwwwwwwwwkwwk",
+    "kwwwwwwwwwwwwwwk",
+    ".kwwwkwwwwkwwwk.",
+    "..kkk.kkkk.kkk.."
+  ];
+  const HAPPY = SAD.slice();
+  HAPPY[5] = "kwwwkwwwwwwkwwwk";
+  HAPPY[6] = "kwwkwkwwwwkwkwwk";
+
+  const COLORS = { k: "#0E2A66", w: "#FFFFFF", p: "#8EC5FF" };
+
+  function drawCat(map) {
+    const svg = document.getElementById("cat");
+    let out = "";
+    map.forEach((row, y) => {
+      [...row].forEach((c, x) => {
+        if (COLORS[c]) out += `<rect x="${x}" y="${y}" width="1" height="1" fill="${COLORS[c]}"/>`;
+      });
+    });
+    svg.innerHTML = out;
+  }
+  drawCat(SAD);
+
+  // ---------- Nubes y cerros pixelados ----------
+  function cloud(cx, cy, s) {
+    const rows = [[2,6],[1,8],[0,10],[0,10],[1,8]];
+    return rows.map((r, i) =>
+      `<rect x="${cx + r[0]*s}" y="${cy + i*s}" width="${r[1]*s}" height="${s}" fill="#FFFFFF" opacity="0.9"/>`
+    ).join("");
+  }
+  document.getElementById("clouds").innerHTML =
+    cloud(4, 4, 2) + cloud(55, 14, 1.5) + cloud(118, 2, 2.2) + cloud(92, 24, 1.2);
+
+  function hill(color, base, amp, freq, phase) {
+    let out = "";
+    for (let x = 0; x < 160; x += 4) {
+      const h = Math.round((base + Math.sin(x / freq + phase) * amp) / 2) * 2;
+      out += `<rect x="${x}" y="${60 - h}" width="4" height="${h}" fill="${color}"/>`;
+    }
+    return out;
+  }
+  document.getElementById("hills").innerHTML =
+    hill("#4A8FE0", 30, 10, 18, 0) + hill("#2C62C2", 16, 6, 11, 2);
+
+  // ---------- Lógica de botones ----------
+  const yes = document.getElementById("yes");
+  const no = document.getElementById("no");
+  const hint = document.getElementById("hint");
+  const lines = ["Are you sure?", "Really sure?", "Think again...", "Wrong button!", "Last chance!", "Come on..."];
+  let clicks = 0;
+  let yesSize = 22;
+
+  no.addEventListener("click", () => {
+    clicks++;
+    yesSize = Math.round(yesSize * 1.35);
+    yes.style.fontSize = yesSize + "px";
+    yes.style.padding = `${yesSize * 0.7}px ${yesSize * 1.4}px`;
+    hint.textContent = lines[(clicks - 1) % lines.length];
+  });
+
+  yes.addEventListener("click", () => {
+    drawCat(HAPPY);
+    document.getElementById("app").classList.add("done");
+    document.getElementById("question").textContent = "Correct answer!";
+    document.getElementById("buttons").remove();
+    hint.textContent = "";
+    const box = document.getElementById("hearts");
+    for (let i = 0; i < 18; i++) {
+      const h = document.createElement("span");
+      h.textContent = "💙";
+      h.style.left = Math.random() * 95 + "vw";
+      h.style.bottom = "-30px";
+      h.style.animationDelay = (Math.random() * 1.2) + "s";
+      box.appendChild(h);
+    }
+  });
+</script>
+</body>
+</html>
